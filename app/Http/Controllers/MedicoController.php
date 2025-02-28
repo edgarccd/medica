@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Medico;
+use Illuminate\Support\Facades\DB;
 
 class MedicoController extends Controller
 {
@@ -52,9 +53,7 @@ class MedicoController extends Controller
         return view('medicos.edit', ['medico' => $medico]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    
     public function update(Request $request, $medico)
     {
         $request->validate([
@@ -78,5 +77,39 @@ class MedicoController extends Controller
     {
         $medico->delete();
         return to_route('medicos.index');
+    }
+
+    public function search(Request $request)
+    {
+        $medicos=[];
+
+        if ($request->input('busqueda') == "nombre") {
+            $medicos = DB::table('medicos')                
+                ->where('medicos.nombre', 'like', '%' . $request->input('nombre') . '%')
+                ->orderBy('medicos.apellido_pat', 'asc')
+                ->orderBy('medicos.apellido_mat', 'asc')
+                ->orderBy('medicos.nombre', 'asc')
+                ->get();
+        }
+        if ($request->input('busqueda') == "paterno") {
+            $medicos = DB::table('medicos')                
+                ->where('medicos.apellido_pat', 'like', '%' . $request->input('nombre') . '%')
+                ->orderBy('medicos.apellido_pat', 'asc')
+                ->orderBy('medicos.apellido_mat', 'asc')
+                ->orderBy('medicos.apellido_pat', 'asc')
+                ->get();
+        }
+
+        if ($request->input('busqueda') == "materno") {
+            $medicos = DB::table('medicos')                
+                ->where('medicos.apellido_pat', 'like', '%' . $request->input('nombre') . '%')
+                ->orderBy('medicos.apellido_pat', 'asc')
+                ->orderBy('medicos.apellido_mat', 'asc')
+                ->orderBy('medicos.apellido_pat', 'asc')
+                ->get();
+        }
+
+        return view('medicos.search', ['medicos' => $medicos]);
+        
     }
 }
