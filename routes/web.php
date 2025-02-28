@@ -15,7 +15,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/medicos/store', [MedicoController::class, 'store'])->name('medicos.store');
     Route::get('/medicos/edit/{medico}', [MedicoController::class, 'edit'])->name('medicos.edit');
     Route::patch('/medicos/update/{medico}', [MedicoController::class, 'update'])->name('medicos.update');
-    Route::delete('/medicos/{medico}', [MedicoController::class, 'destroy'])->name('medicos.destroy');
+    Route::delete('/medicos/{medico}', [MedicoController::class, 'destroy'])->name('medicos.destroy');    
+    Route::get('/medicos/search', [MedicoController::class, 'search'])->name('medicos.search');
 });    
 
 Route::get('/dashboard', function () {
