@@ -8,7 +8,8 @@
                         <th>Apellido Paterno</th>
                         <th>Apellido Materno</th>
                         <th>Nombre</th>
-                        <th></th>
+                        <th>Editar</th>
+                        <th>Eliminar</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -18,6 +19,16 @@
                             <td>{{ $medico->apellido_mat }}</td>
                             <td>{{ $medico->nombre }}</td>
                             <td>
+                                <a href="{{ route('medicos.edit', $medico) }}"
+                                class="btn btn-outline-primary">Editar</a>
+                            </td>
+                            <td>
+
+                                <form action="{{ route('medicos.destroy', $medico) }}" method="post">
+                                    @csrf
+                                    @method('delete')
+                                    <button type="submit" class="btn btn-outline-danger">Eliminar</button>
+                                </form>
 
                             </td>
                         </tr>

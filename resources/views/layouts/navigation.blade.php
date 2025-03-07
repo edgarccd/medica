@@ -27,7 +27,7 @@
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{{ route('medicos.create') }}">Registrar</a></li>
                         <li><a class="dropdown-item" href="{{ route('medicos.index') }}">Mostrar</a></li>
-
+                        <li><a class="dropdown-item" href="{{ route('medicos.search') }}">Buscar</a></li>
                        
                     </ul>
                 </li>
