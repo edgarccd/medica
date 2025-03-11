@@ -2,96 +2,105 @@
 
 namespace App\Http\Controllers;
 
-use PayPal\Auth\OAuthTokenCredential;
-use PayPal\Rest\ApiContext;
-use PayPal\Api\Payer;
-use PayPal\Api\Item;
-use PayPal\Api\ItemList;
-use PayPal\Api\Amount;
-use PayPal\Api\Transaction;
-use PayPal\Api\RedirectUrls;
-use PayPal\Api\Payment;
-use PayPal\Api\PaymentExecution;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
+use PayPal\Api\Payer;
+use PayPal\Api\Amount;
+use PayPal\Api\Payment;
+use PayPal\Api\Transaction;
+use PayPal\Rest\ApiContext;
+use PayPal\Api\RedirectUrls;
+use PayPal\Api\PaymentExecution;
+use PayPal\Auth\OAuthTokenCredential;
+use PayPal\Exception\PayPalConnectionException;
+
 
 class PayPalController extends Controller
 {
-    private $apiContext;
-
-    public function __construct()
+     public function payment()
     {
-        $this->apiContext = new ApiContext(
-            new OAuthTokenCredential(
-                config('services.paypal.client_id'),
-                config('services.paypal.secret')
-            )
-        );
-        $this->apiContext->setConfig(config('services.paypal.settings'));
-    }
+    $sum = 500;
+        $apiContext = new ApiContext(
+          new OAuthTokenCredential( 'AaMFNVZfb32tumWRBrdRdausliBOEJ8qUZowcYxNnOZEDZB2ZCMGyjEr9UXXBA2DOzLDsHZOFRs9I6fq',  'EA20V78w4gZnyevZskI9DszMN5NAhcbXuTGYOUJ8Hn6HjTZy4edP2XAOCMyxMzug7_GvPYdWJGEkxRZL'  ) );
+// dd($apiContext);
+      $payer = new Payer();
+      $payer->setPaymentMethod("paypal");
+      // dd($payer);
+      // Set redirect URLs
+      $redirectUrls = new RedirectUrls();
+      $redirectUrls->setReturnUrl(route('paypal.success'))
+          ->setCancelUrl(route('paypal.cancel'));
+      // dd($redirectUrls);
+      // Set payment amount
+      $amount = new Amount();
+      $amount->setCurrency("USD")
+          ->setTotal($sum);
 
-    public function payWithPayPal()
-    {
-        $payer = new Payer();
-        $payer->setPaymentMethod("paypal");
 
-        $item = new Item();
-        $item->setName('Producto de prueba')
-            ->setCurrency('USD')
-            ->setQuantity(1)
-            ->setPrice(10);
+      // Set transaction object
+      $transaction = new Transaction();
+      $transaction->setAmount($amount)
+          ->setDescription(" Hello ");
+      //   dd($transaction);
+      // Create the full payment object
+      $payment = new Payment();
+      $payment->setIntent('sale')
+          ->setPayer($payer)
+          ->setRedirectUrls($redirectUrls)
+          ->setTransactions(array($transaction));
+      // dd($payment);
+      // Create payment with valid API context
+      try {
 
-        $itemList = new ItemList();
-        $itemList->setItems([$item]);
+          $payment->create($apiContext);
+          // dd($payment);
+          // Get PayPal redirect URL and redirect the customer
+          // $approvalUrl =
+          return redirect($payment->getApprovalLink());
+          // dd($approvalUrl);
+          // Redirect the customer to $approvalUrl
+      } catch (PayPalConnectionException $ex) {
+          echo $ex->getCode();
+          echo $ex->getData();
+          die($ex);
+      } catch (Exception $ex) {
+          die($ex);
+      }
+  }
 
-        $amount = new Amount();
-        $amount->setCurrency("USD")
-            ->setTotal(10);
 
-        $transaction = new Transaction();
-        $transaction->setAmount($amount)
-            ->setItemList($itemList)
-            ->setDescription("Pago de prueba en Laravel con PayPal");
+  
+// this is success route
+public function success(Request $request)
+{
+    $apiContext = new ApiContext(
+        new OAuthTokenCredential('ClientID', 'ClientSecret') );
 
-        $redirectUrls = new RedirectUrls();
-        $redirectUrls->setReturnUrl(route('paypal.success'))
-            ->setCancelUrl(route('paypal.cancel'));
+    // Get payment object by passing paymentId
+    $paymentId = $_GET['paymentId'];
+    $payment = Payment::get($paymentId, $apiContext);
+    $payerId = $_GET['PayerID'];
 
-        $payment = new Payment();
-        $payment->setIntent("sale")
-            ->setPayer($payer)
-            ->setRedirectUrls($redirectUrls)
-            ->setTransactions([$transaction]);
+    // Execute payment with payer ID
+    $execution = new PaymentExecution();
+    $execution->setPayerId($payerId);
 
-        try {
-            $payment->create($this->apiContext);
-            return redirect($payment->getApprovalLink());
-        } catch (\Exception $ex) {
-            return back()->withError("Hubo un error al procesar el pago.");
-        }
-    }
+    try {
+        dd('success');
+        
 
-    public function successPayPal(Request $request)
-    {
-        if (empty($request->input('PayerID')) || empty($request->input('paymentId'))) {
-            return redirect()->route('home')->withError('El pago fue cancelado.');
-        }
-
-        $payment = Payment::get($request->input('paymentId'), $this->apiContext);
-
-        $execution = new PaymentExecution();
-        $execution->setPayerId($request->input('PayerID'));
-
-        try {
-            $result = $payment->execute($execution, $this->apiContext);
-            return redirect()->route('home')->withSuccess('Pago realizado correctamente.');
-        } catch (\Exception $ex) {
-            return redirect()->route('home')->withError('Hubo un error al procesar el pago.');
-        }
-    }
-
-    public function cancelPayPal()
-    {
-        return redirect()->route('home')->withError('El pago fue cancelado.');
+    } catch (PayPalConnectionException $ex) {
+        echo $ex->getCode();
+        echo $ex->getData();
+        die($ex);
+    } catch (Exception $ex) {
+        die($ex);
     }
 }
+
+// this is cancel route
+  public function cancel()
+{
+        dd('payment cancel');
+}
+}
+

@@ -37,6 +37,6 @@
 
             </tbody>
         </table>
-        <a href="{{ route('paypal.pay') }}" class="btn btn-primary">Pagar con PayPal</a>
+        <a href="{{ route('paypal.payment') }}" class="btn btn-primary">Pagar con PayPal</a>
     </div>
 </x-app-layout>

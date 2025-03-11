@@ -27,9 +27,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::get('paypal/pay', [PayPalController::class, 'payWithPayPal'])->name('paypal.pay');
-    Route::get('paypal/success', [PayPalController::class, 'successPayPal'])->name('paypal.success');
-    Route::get('paypal/cancel', [PayPalController::class, 'cancelPayPal'])->name('paypal.cancel');
+    Route::get('paypal-payment',[PayPalController::class,"payment"])->name('paypal.payment');
+    Route::get('paypal-success',[PayPalController::class,"success"])->name('paypal.success');
+    Route::get('paypal-cancel',[PayPalController::class,'cancel'])->name('paypal.cancel');
 
 });
 
